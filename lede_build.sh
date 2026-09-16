@@ -14,16 +14,6 @@ LEDE_DIR="${WORK_DIR}/lede"
 CONFIG_SRC="${WORK_DIR}/.config"
 FIRMWARE_DIR="${WORK_DIR}/firmware"
 
-# 初始化ccache，提前建好目录+权限，杜绝权限不足报错
-if [[ $USE_CCACHE -eq 1 ]];then
-    mkdir -p "${CCACHE_DIR}"
-    chmod -R u+rwx "${CCACHE_DIR}" || true
-    export CCACHE_DIR
-    export PATH="/usr/lib/ccache:$PATH"
-    ccache -M 5G
-    ccache -z
-fi
-
 print_disk(){
     echo -e "\n===== 磁盘状态 ====="
     df -h /home/runner/work
@@ -64,6 +54,23 @@ git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev lib
 libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
 mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip libpython3-dev qemu-utils \
 rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+
+# ========== 移到这里！apt安装完成后再初始化ccache ==========
+if [[ $USE_CCACHE -eq 1 ]];then
+    if command -v ccache &> /dev/null; then
+        mkdir -p "${CCACHE_DIR}"
+        chmod -R u+rwx "${CCACHE_DIR}" || true
+        export CCACHE_DIR
+        export PATH="/usr/lib/ccache:$PATH"
+        ccache -M 5G
+        ccache -z
+        echo "✅ ccache 已启用"
+    else
+        echo "⚠️ ccache命令不存在，自动关闭ccache缓存"
+        USE_CCACHE=0
+    fi
+fi
+# ==========================================================
 
 echo "===== 【3】克隆/更新 LEDE 源码 coolsnowwolf/lede ====="
 if [ -d "${LEDE_DIR}/.git" ]; then
