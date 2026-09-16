@@ -14,6 +14,9 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v4
 
+      - name: 调试打印根目录全部文件
+        run: ls -la
+
       - name: 清理磁盘空间(关键，防止磁盘爆满失败)
         run: |
           sudo rm -rf /usr/share/dotnet
@@ -27,7 +30,8 @@ jobs:
 
       - name: 执行编译脚本
         run: |
-          sudo ./lede_build.sh
+          export FORCE_UNSAFE_CONFIGURE=1
+          ./lede_build.sh
 
       - name: 上传固件产物
         uses: actions/upload-artifact@v4
@@ -35,4 +39,3 @@ jobs:
           name: lede-firmware-${{ github.run_number }}
           path: firmware/
           retention-days: 30
-
