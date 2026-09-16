@@ -1,0 +1,38 @@
+name: Build LEDE OpenWrt Firmware
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+
+jobs:
+  build:
+    name: Compile Lede Firmware
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: 清理磁盘空间(关键，防止磁盘爆满失败)
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo apt clean
+
+      - name: Git镜像加速github克隆（国内建议保留）
+        run: |
+          git config --global url."https://mirror.ghproxy.com/https://github.com".insteadOf "https://github.com"
+
+      - name: 执行编译脚本
+        run: |
+          sudo ./lede_build.sh
+
+      - name: 上传固件产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: lede-firmware-${{ github.run_number }}
+          path: firmware/
+          retention-days: 30
+
