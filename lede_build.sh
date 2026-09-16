@@ -77,13 +77,23 @@ fi
 echo "===== [10] make defconfig ====="
 make defconfig
 
-echo "===== [11] make download -j8 下载源码包 ====="
+echo "===== [11] 磁盘空间检查 df -h ====="
+df -h
+
+# 清理编译中间垃圾，释放空间
+sudo apt autoremove -y || true
+sudo apt clean
+
+echo "===== [12] 清理后磁盘空间 ====="
+df -h
+
+echo "===== [13] make download -j8 下载源码包 ====="
 make download -j8
 
-echo "===== [12] 开始编译 make V=s -j1 ====="
+echo "===== [14] 开始编译 make V=s -j1 ====="
 make V=s -j1
 
-echo "===== [13] 拷贝bin固件输出 ====="
+echo "===== [15] 拷贝bin固件输出 ====="
 mkdir -p "$FIRMWARE_DIR"
 if [ -d "$FIRMWARE_DIR/bin" ]; then
     BACKUP="$FIRMWARE_DIR/lede-old-$(date +%Y%m%d%H%M%S)"
@@ -91,7 +101,7 @@ if [ -d "$FIRMWARE_DIR/bin" ]; then
 fi
 cp -r "${LEDE_DIR}/bin" "$FIRMWARE_DIR/"
 
-echo "===== [14] 日期重命名输出文件夹 ====="
+echo "===== [16] 日期重命名输出文件夹 ====="
 TARGET="${FIRMWARE_DIR}/lede-$(date +%Y%m%d)"
 if [ -e "$TARGET" ]; then
     TARGET="${TARGET}-$(date +%H%M%S)"
