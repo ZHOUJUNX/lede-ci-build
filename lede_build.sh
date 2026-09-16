@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
-# github actions CI环境，全部使用工作目录，不再写死zhoujun的home路径
+
+# 绕过host工具tar configure的root安全校验（CI环境专用）
+export FORCE_UNSAFE_CONFIGURE=1
+
 WORK_DIR=$(pwd)
 LEDE_DIR="${WORK_DIR}/lede"
 CONFIG_SRC="${WORK_DIR}/.config"
@@ -14,13 +17,13 @@ echo " 固件输出目录: $FIRMWARE_DIR"
 echo "============================================"
 
 echo "===== [1] 更新软件源 ====="
-apt-get update
+sudo apt-get update
 
 echo "===== [2] 系统升级 ====="
-apt full-upgrade -y
+sudo apt full-upgrade -y
 
 echo "===== [3] 安装编译依赖 ====="
-apt install -y ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential \
+sudo apt install -y ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential \
 bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
 git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
 libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
@@ -34,7 +37,6 @@ if [ -d "$LEDE_DIR/.git" ]; then
     git pull
 else
     git clone https://github.com/coolsnowwolf/lede "$LEDE_DIR"
-    cd "$LEDE_DIR"
 fi
 cd "$LEDE_DIR"
 
@@ -98,4 +100,3 @@ mv "${FIRMWARE_DIR}/bin" "$TARGET"
 
 echo "DONE! Firmware output: $TARGET"
 ls -la "$TARGET"
-
