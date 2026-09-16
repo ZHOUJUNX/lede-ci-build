@@ -2,21 +2,26 @@
 set -e
 export FORCE_UNSAFE_CONFIGURE=1
 
-# ===================== 配置开关（重点）=====================
+# ===================== 配置开关 =====================
 FORCE_DIRCLEAN=0          # 0=关闭dirclean(提速); 1=开启完整清理(修复脏构建/头文件报错)
 USE_CCACHE=1              # 开启ccache缓存，减少重编译时间
-CCACHE_DIR="${WORK_DIR}/.ccache"
+CCACHE_DIR="${GITHUB_WORKSPACE}/.ccache"
 DISK_WARN_THRESHOLD=$((4*1024*1024)) # 4GB告警 KB
-# =========================================================
+# ====================================================
 
 WORK_DIR=$(pwd)
 LEDE_DIR="${WORK_DIR}/lede"
 CONFIG_SRC="${WORK_DIR}/.config"
 FIRMWARE_DIR="${WORK_DIR}/firmware"
 
+# 初始化ccache，提前建好目录+权限，杜绝权限不足报错
 if [[ $USE_CCACHE -eq 1 ]];then
+    mkdir -p "${CCACHE_DIR}"
+    chmod -R u+rwx "${CCACHE_DIR}" || true
     export CCACHE_DIR
     export PATH="/usr/lib/ccache:$PATH"
+    ccache -M 5G
+    ccache -z
 fi
 
 print_disk(){
@@ -59,12 +64,6 @@ git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev lib
 libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
 mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip libpython3-dev qemu-utils \
 rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-
-# ccache初始化
-if [[ $USE_CCACHE -eq 1 ]];then
-    ccache -M 5G  # 设置ccache最大缓存5G
-    ccache -z
-fi
 
 echo "===== 【3】克隆/更新 LEDE 源码 coolsnowwolf/lede ====="
 if [ -d "${LEDE_DIR}/.git" ]; then
@@ -133,8 +132,7 @@ print_disk
 echo "===== 【10】make download -j8 预下载源码包 ====="
 make download -j8
 
-echo "===== 【11】开始编译 (V=s开启完整日志用于调试；正常编译去掉V=s提速) ====="
-# 调试时开启 V=s；日常编译：make -j1
+echo "===== 【11】开始编译 ====="
 make -j1
 
 if [[ $USE_CCACHE -eq 1 ]];then
