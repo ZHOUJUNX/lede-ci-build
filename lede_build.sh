@@ -9,6 +9,22 @@ LEDE_DIR="${WORK_DIR}/lede"
 CONFIG_SRC="${WORK_DIR}/.config"
 FIRMWARE_DIR="${WORK_DIR}/firmware"
 
+# ==========【这里插入上面深度清理代码】==========
+echo "===== 深度清理Runner预装组件，释放磁盘空间 ====="
+sudo rm -rf /usr/share/dotnet || true
+sudo rm -rf /opt/ghc || true
+sudo rm -rf /usr/local/share/boost || true
+sudo rm -rf /usr/local/lib/android || true
+sudo rm -rf /opt/microsoft || true
+
+sudo apt-get -y purge azure-cli* docker* ghc* llvm* firefox* google* dotnet* powershell* || true
+sudo apt autoremove -y || true
+sudo apt clean
+
+echo "===== 清理完成，查看磁盘占用 ====="
+df -h
+# ==============================================
+
 echo "============================================"
 echo " LEDE GitHub Actions CI 编译脚本"
 echo " 源码目录: $LEDE_DIR"
@@ -39,6 +55,14 @@ else
     git clone https://github.com/coolsnowwolf/lede "$LEDE_DIR"
 fi
 cd "$LEDE_DIR"
+
+# ============新增：CI强制彻底清理旧编译状态 start ============
+echo "===== CI: dirclean 清除工具链、旧编译目录，避免sys‑include头文件缺失 ====="
+rm -rf build_dir staging_dir bin tmp .config
+make clean || true
+make dirclean || true
+echo "===== 清理完成 ====="
+# ============新增 end ============
 
 echo "===== [5] feeds update ====="
 ./scripts/feeds update -a
