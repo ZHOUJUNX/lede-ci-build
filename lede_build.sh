@@ -73,14 +73,21 @@ fi
 # ==========================================================
 
 echo "===== 【3】克隆/更新 LEDE 源码 coolsnowwolf/lede ====="
-if [ -d "${LEDE_DIR}/.git" ]; then
-    echo "lede目录已存在，执行git pull更新"
-    cd "${LEDE_DIR}"
-    git pull --rebase
+if [ -d "${LEDE_DIR}" ]; then
+    if [ -d "${LEDE_DIR}/.git" ]; then
+        echo "lede仓库存在，执行git pull更新"
+        cd "${LEDE_DIR}"
+        git pull --rebase
+    else
+        echo "lede目录存在但不是完整git仓库，删除旧目录重新克隆"
+        rm -rf "${LEDE_DIR}"
+        git clone --depth 1 https://github.com/coolsnowwolf/lede "${LEDE_DIR}"
+    fi
 else
     git clone --depth 1 https://github.com/coolsnowwolf/lede "${LEDE_DIR}"
 fi
 cd "${LEDE_DIR}"
+
 
 echo "===== 【4】构建目录清理（FORCE_DIRCLEAN=$FORCE_DIRCLEAN） ====="
 if [[ $FORCE_DIRCLEAN -eq 1 ]];then
