@@ -147,7 +147,7 @@ if [[ $USE_CCACHE -eq 1 ]];then
     ccache -s
 fi
 
-echo "===== 【12】固件输出归档 ====="
+echo "===== 【12】固件输出归档打包，文件名 lede_YYYYMMDD.zip ====="
 mkdir -p "$FIRMWARE_DIR"
 if [ -d "${FIRMWARE_DIR}/bin" ]; then
     BACKUP="${FIRMWARE_DIR}/lede-old-$(date +%Y%m%d%H%M%S)"
@@ -155,14 +155,16 @@ if [ -d "${FIRMWARE_DIR}/bin" ]; then
 fi
 cp -r "${LEDE_DIR}/bin" "${FIRMWARE_DIR}/"
 
-TARGET="${FIRMWARE_DIR}/lede-$(date +%Y%m%d)"
-if [ -e "$TARGET" ];then
-    TARGET="${TARGET}-$(date +%H%M%S)"
-fi
-mv "${FIRMWARE_DIR}/bin" "$TARGET"
+# 生成日期 YYYYMMDD
+BUILD_DATE=$(date +%Y%m%d)
+ZIP_NAME="lede_${BUILD_DATE}.zip"
+
+cd "$FIRMWARE_DIR"
+zip -r "${ZIP_NAME}" bin/
 
 echo "============================================"
-echo "✅ 编译全部完成！固件目录：$TARGET"
-ls -la "$TARGET"
+echo "✅ 编译全部完成！压缩包名称：${ZIP_NAME}"
+ls -la "${ZIP_NAME}"
 echo "============================================"
 exit 0
+
