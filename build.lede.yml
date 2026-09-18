@@ -1,0 +1,39 @@
+name: Build OpenWrt X86 Firmware
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    name: Compile OpenWrt X86 Firmware
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+      - name: Show workspace files
+        run: ls -la
+      - name: Clear git proxy config
+        run: |
+          git config --global --unset-all url."https://mirror.ghproxy.com/https://github.com".insteadOf || true
+      # 仅缓存dl源码包，减少重复下载
+      - name: Cache dl source
+        uses: actions/cache@v4
+        with:
+          path: lede/dl
+          key: ${{ runner.os }}-lede-dl-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-lede-dl-
+      - name: Run build script
+        run: |
+          export FORCE_UNSAFE_CONFIGURE=1
+          chmod +x ./lede_build.sh
+          ./lede_build.sh
+      # 获取日期，用于artifact命名
+      - name: Get build date
+        id: get_build_date
+        run: echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt_x86_${{ steps.get_build_date.outputs.BUILD_DATE }}
+          path: firmware/*.zip
+          retention-days: 30
