@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+<<<<<<< Updated upstream
 export FORCE_UNSAFE_CONFIGURE=1
 
 # ===================== 配置开关 =====================
@@ -9,6 +10,12 @@ CCACHE_DIR="${GITHUB_WORKSPACE}/.ccache"
 DISK_WARN_THRESHOLD=$((4*1024*1024)) # 4GB告警 KB
 # ====================================================
 
+=======
+
+# 绕过host工具tar configure的root安全校验（CI环境专用）
+export FORCE_UNSAFE_CONFIGURE=1
+
+>>>>>>> Stashed changes
 WORK_DIR=$(pwd)
 LEDE_DIR="${WORK_DIR}/lede"
 CONFIG_SRC="${WORK_DIR}/.config"
@@ -46,15 +53,27 @@ echo " CONFIG_SRC:   $CONFIG_SRC"
 echo " FIRMWARE_OUT: $FIRMWARE_DIR"
 echo "============================================"
 
+<<<<<<< Updated upstream
 echo "===== 【2】更新apt源 & 安装编译依赖 ====="
 sudo apt-get update -qq
 sudo apt install -y -qq ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential \
+=======
+echo "===== [1] 更新软件源 ====="
+sudo apt-get update
+
+echo "===== [2] 系统升级 ====="
+sudo apt full-upgrade -y
+
+echo "===== [3] 安装编译依赖 ====="
+sudo apt install -y ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential \
+>>>>>>> Stashed changes
 bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
 git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
 libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
 mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip libpython3-dev qemu-utils \
 rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
+<<<<<<< Updated upstream
 # ========== 移到这里！apt安装完成后再初始化ccache ==========
 if [[ $USE_CCACHE -eq 1 ]];then
     if command -v ccache &> /dev/null; then
@@ -69,6 +88,15 @@ if [[ $USE_CCACHE -eq 1 ]];then
         echo "⚠️ ccache命令不存在，自动关闭ccache缓存"
         USE_CCACHE=0
     fi
+=======
+echo "===== [4] 克隆 LEDE 源码 coolsnowwolf/lede ====="
+if [ -d "$LEDE_DIR/.git" ]; then
+    echo "lede目录已存在，git pull更新"
+    cd "$LEDE_DIR"
+    git pull
+else
+    git clone https://github.com/coolsnowwolf/lede "$LEDE_DIR"
+>>>>>>> Stashed changes
 fi
 # ==========================================================
 
@@ -166,6 +194,7 @@ cp -r "${LEDE_DIR}/bin" "${FIRMWARE_DIR}/"
 BUILD_DATE=$(date +%Y%m%d)
 ZIP_NAME="lede_${BUILD_DATE}.zip"
 
+<<<<<<< Updated upstream
 cd "$FIRMWARE_DIR"
 zip -r "${ZIP_NAME}" bin/
 
@@ -175,3 +204,7 @@ ls -la "${ZIP_NAME}"
 echo "============================================"
 exit 0
 
+=======
+echo "DONE! Firmware output: $TARGET"
+ls -la "$TARGET"
+>>>>>>> Stashed changes

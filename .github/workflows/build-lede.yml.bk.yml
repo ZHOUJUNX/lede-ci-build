@@ -1,11 +1,11 @@
-name: Build OpenWrt X86 Firmware
+name: Build LEDE OpenWrt Firmware
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Compile OpenWrt X86 Firmware
+    name: Compile Lede Firmware
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     steps:
