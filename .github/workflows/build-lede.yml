@@ -25,6 +25,7 @@ jobs:
       - name: Run build script
         run: |
           export FORCE_UNSAFE_CONFIGURE=1
+          chmod +x ./lede_build.sh
           ./lede_build.sh
       # 获取日期，用于artifact命名
       - name: Get build date
