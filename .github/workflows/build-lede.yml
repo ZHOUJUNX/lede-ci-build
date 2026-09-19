@@ -20,17 +20,21 @@ jobs:
         uses: actions/cache@v4
         with:
           path: lede/dl
-          key: ${{ runner.os }}-lede-dl
+          key: Linux-lede-dl
           restore-keys: |
-            ${{ runner.os }}-lede-dl
+            Linux-lede-dl
       # 打印缓存命中状态
       - name: Print cache hit status
         run: echo "Cache hit = ${{ steps.cache_dl.outputs.cache-hit }}"
+      # 执行编译脚本（内部包含深度磁盘清理）
       - name: Run build script
         run: |
           export FORCE_UNSAFE_CONFIGURE=1
           chmod +x ./lede_build.sh
           ./lede_build.sh
+      # 清理完成后查看磁盘空间
+      - name: Show disk space after cleanup
+        run: df -h
       # 获取日期，用于artifact命名
       - name: Get build date
         run: echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
