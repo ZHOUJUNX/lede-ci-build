@@ -151,21 +151,31 @@ if [[ $USE_CCACHE -eq 1 ]];then
     ccache -s
 fi
 
-echo "===== 【12】固件输出归档打包，文件名 lede_YYYYMMDD.zip ====="
+echo "===== 【12】固件输出归档打包，外层带日期文件夹 ====="
 mkdir -p "$FIRMWARE_DIR"
-if [ -d "${FIRMWARE_DIR}/bin" ]; then
-    BACKUP="${FIRMWARE_DIR}/lede-old-$(date +%Y%m%d%H%M%S)"
-    mv "${FIRMWARE_DIR}/bin" "$BACKUP"
-fi
-cp -r "${LEDE_DIR}/bin" "${FIRMWARE_DIR}/"
-# 生成日期 YYYYMMDD
+# 生成日期
 BUILD_DATE=$(date +%Y%m%d)
-ZIP_NAME="lede_${BUILD_DATE}.zip"
+# 外层文件夹名称
+OUT_FOLDER="openwrt_x86_${BUILD_DATE}"
+ZIP_NAME="${OUT_FOLDER}.zip"
+# 目标完整路径
+OUT_TMP="${FIRMWARE_DIR}/${OUT_FOLDER}"
 
+# 清理旧打包残留
+if [ -d "${OUT_TMP}" ]; then
+    rm -rf "${OUT_TMP}"
+fi
+# 创建外层目录，复制bin全部固件进去
+mkdir -p "${OUT_TMP}"
+cp -r "${LEDE_DIR}/bin" "${OUT_TMP}/"
+
+# 进入firmware目录打包，zip根目录就是 openwrt_x86_20260919
 cd "$FIRMWARE_DIR"
-zip -r "${ZIP_NAME}" bin/
+zip -r "${ZIP_NAME}" "${OUT_FOLDER}"
+cd "${WORK_DIR}"
+
 echo "============================================"
 echo "✅ 编译全部完成！压缩包名称：${ZIP_NAME}"
-ls -la "${ZIP_NAME}"
+ls -la "${FIRMWARE_DIR}/${ZIP_NAME}"
 echo "============================================"
 exit 0
