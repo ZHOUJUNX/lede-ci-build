@@ -14,14 +14,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Show workspace files
         run: ls -la
-      # 仅缓存dl源码包，减少重复下载
+      # 仅缓存dl源码包，减少重复下载（可跨任务复用缓存）
       - name: Cache dl source
         uses: actions/cache@v4
         with:
           path: lede/dl
-          key: ${{ runner.os }}-lede-dl-${{ github.run_id }}
+          key: ${{ runner.os }}-lede-dl
           restore-keys: |
-            ${{ runner.os }}-lede-dl-
+            ${{ runner.os }}-lede-dl
       - name: Run build script
         run: |
           export FORCE_UNSAFE_CONFIGURE=1
@@ -37,4 +37,3 @@ jobs:
           name: openwrt_x86_${{ steps.get_build_date.outputs.BUILD_DATE }}
           path: firmware/*.zip
           retention-days: 30
-
