@@ -1,6 +1,9 @@
 name: Build OpenWrt X86 Firmware
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+      timezone: Asia/Shanghai
 jobs:
   build:
     name: Compile OpenWrt X86 Firmware
@@ -37,3 +40,4 @@ jobs:
           name: openwrt_x86_${{ steps.get_build_date.outputs.BUILD_DATE }}
           path: firmware/*.zip
           retention-days: 30
+
