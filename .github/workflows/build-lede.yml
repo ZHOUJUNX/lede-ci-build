@@ -16,12 +16,16 @@ jobs:
         run: ls -la
       # 仅缓存dl源码包，减少重复下载（可跨任务复用缓存）
       - name: Cache dl source
+        id: cache_dl
         uses: actions/cache@v4
         with:
           path: lede/dl
           key: ${{ runner.os }}-lede-dl
           restore-keys: |
             ${{ runner.os }}-lede-dl
+      # 打印缓存命中状态
+      - name: Print cache hit status
+        run: echo "Cache hit = ${{ steps.cache_dl.outputs.cache-hit }}"
       - name: Run build script
         run: |
           export FORCE_UNSAFE_CONFIGURE=1
@@ -30,10 +34,16 @@ jobs:
       # 获取日期，用于artifact命名
       - name: Get build date
         run: echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+      # 把固件zip复制到当前目录，避免嵌套bin文件夹
+      - name: Copy firmware to workspace root
+        run: cp firmware/*.zip ./ || true
+
+      # 上传固件，if-no-files-found: ignore 没有固件也不报错
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: openwrt_x86_${{ env.BUILD_DATE }}
-          path: firmware/*.zip
-          root: firmware
+          path: ./*.zip
           retention-days: 30
+          if-no-files-found: ignore
