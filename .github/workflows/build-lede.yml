@@ -35,4 +35,5 @@ jobs:
         with:
           name: openwrt_x86_${{ env.BUILD_DATE }}
           path: firmware/*.zip
+          root: firmware
           retention-days: 30
