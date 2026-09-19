@@ -29,11 +29,10 @@ jobs:
           ./lede_build.sh
       # 获取日期，用于artifact命名
       - name: Get build date
-        id: get_build_date
-        run: echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+        run: echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
-          name: openwrt_x86_${{ steps.get_build_date.outputs.BUILD_DATE }}
+          name: openwrt_x86_${{ env.BUILD_DATE }}
           path: firmware/*.zip
           retention-days: 30
