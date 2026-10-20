@@ -129,7 +129,7 @@ print_disk
 echo "===== 【10】make download -j8 预下载源码包 ====="
 make download -j8
 echo "===== 【11】开始编译 ====="
-make -j1
+make -j$(nproc) V=s
 if [[ $USE_CCACHE -eq 1 ]];then
     echo "===== ccache 统计 ====="
     ccache -s
