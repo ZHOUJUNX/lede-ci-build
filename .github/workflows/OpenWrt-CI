@@ -1,0 +1,61 @@
+name: Build OpenWrt X86 Firmware
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 17 * * *
+jobs:
+  build:
+    name: Compile OpenWrt X86 Firmware
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+      - name: Show workspace files
+        run: ls -la
+ # #
+      - name: Cache dl source
+        id: cache_dl
+        uses: actions/cache@v4
+        with:
+          path: lede/dl
+          key: Linux-lede-dl-${{ github.sha }}
+          restore-keys: |
+            Linux-lede-dl-
+ # #
+      - name: Cache ccache
+        id: cache_ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: Linux-lede-ccache-${{ github.sha }}
+          restore-keys: |
+            Linux-lede-ccache-
+ # #
+      - name: Print cache hit status
+        run: |
+          echo "DL Cache hit = ${{ steps.cache_dl.outputs.cache-hit }}"
+          echo "CCACHE Cache hit = ${{ steps.cache_ccache.outputs.cache-hit }}"
+ # #
+      - name: Run build script
+        run: |
+          export FORCE_UNSAFE_CONFIGURE=1
+          chmod +x ./lede_build.sh
+          ./lede_build.sh
+ # #
+      - name: Show disk space after cleanup
+        run: df -h
+ # #
+      - name: Get build date
+        run: echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+ # #
+      - name: Copy firmware to workspace root
+        run: cp firmware/*.zip ./ || true
+ # #
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt_x86_${{ env.BUILD_DATE }}
+          path: ./*.zip
+          retention-days: 30
+          if-no-files-found: ignore
