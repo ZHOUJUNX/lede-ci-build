@@ -1,4 +1,4 @@
-name: Build OpenWrt X86 Firmware
+name: OpenWrt-CI
 on:
   workflow_dispatch:
   schedule:
